@@ -87,21 +87,6 @@ The chatbot offers a comprehensive set of functionalities for interacting with M
     # HF_MODEL="mistralai/Mixtral-8x7B-Instruct-v0.1"
     ```
 
-4.  **Create `server_config.json` File:**
-    Create a file named `server_config.json` in the same directory as your `chatbot_main.py` script. This file tells the chatbot how to launch and connect to the MCP server containing your MongoDB tools.
-
-    ```json
-    {
-      "mcpServers": {
-        "mongo": {
-          "executable": "python",
-          "args": ["mongo_tools_server.py"],
-          "cwd": "."
-        }
-      }
-    }
-    ```
-    **Note:** Ensure `mongo_tools_server.py` matches the actual filename you used.
 
 ### Running the Chatbot
 
