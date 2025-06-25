@@ -1,0 +1,53 @@
+{
+  "gr-qc/0702140v1": {
+    "title": "Discrete spacetime and its applications",
+    "authors": [
+      "Eitan Bachmat"
+    ],
+    "summary": "We survey some results about the asymptotic behavior of discrete spacetime\nmodels, which appeared in diverse settings in the physics and math literature.\nWe then discuss some recent applications, including scheduling in disk drives\nand analysis of airplane boarding strategies.",
+    "pdf_url": "http://arxiv.org/pdf/gr-qc/0702140v1",
+    "published": "2007-02-27"
+  },
+  "0711.2884v1": {
+    "title": "Uniqueness and disjointness of Klyachko models",
+    "authors": [
+      "Omer Offen",
+      "Eitan Sayag"
+    ],
+    "summary": "We show the uniqueness and disjointness of Klyachko models for GL(n,F) over a\nnon-archimedean local field F. This completes, in particular, the study of\nKlyachko models on the unitary dual. Our local results imply a global rigidity\nproperty for the discrete automorphic spectrum.",
+    "pdf_url": "http://arxiv.org/pdf/0711.2884v1",
+    "published": "2007-11-19"
+  },
+  "cond-mat/0505762v1": {
+    "title": "Collisional decay of a strongly driven Bose-Einstein condensate",
+    "authors": [
+      "Nadav Katz",
+      "Eitan Rowen",
+      "Roee Ozeri",
+      "Nir Davidson"
+    ],
+    "summary": "We study the collisional decay of a strongly driven Bose-Einstein condensate\noscillating between two momentum modes. The resulting products of the decay are\nfound to strongly deviate from the usual s-wave halo. Using a stochastically\nseeded classical field method we simulate the collisional manifold. These\nresults are also explained by a model of colliding Bloch states.",
+    "pdf_url": "http://arxiv.org/pdf/cond-mat/0505762v1",
+    "published": "2005-05-31"
+  },
+  "0710.3492v1": {
+    "title": "Global Mixed Periods and local Klyachko models for the general linear group",
+    "authors": [
+      "Omer Offen",
+      "Eitan Sayag"
+    ],
+    "summary": "We show that every irreducible representation in the discrete automorphic\nspectrum of GL(n) admits a non vanishing mixed (Whittaker-symplectic) period\nintegral. The analog local problem is a study of models first considered by\nKlyachko over a finite field. Locally, we show that for a p-adic field F every\nirreducible, unitary representation of GL(n,F) has a Klyachko model.",
+    "pdf_url": "http://arxiv.org/pdf/0710.3492v1",
+    "published": "2007-10-18"
+  },
+  "0902.1582v2": {
+    "title": "A sharp local blow-up condition for Euler-Poisson equations with attractive forcing",
+    "authors": [
+      "Bin Cheng",
+      "Eitan Tadmor"
+    ],
+    "summary": "We improve the recent result of Chae & Tadmor in [Comm. Math. Sci. 6(3)\n(2008) 785-789], proving a one-sided threshold condition which leads to\nfinite-time breakdown of the Euler-Poisson equations in arbitrary dimension n.",
+    "pdf_url": "http://arxiv.org/pdf/0902.1582v2",
+    "published": "2009-02-10"
+  }
+}
