@@ -3,6 +3,7 @@ from anthropic import Anthropic
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 from contextlib import AsyncExitStack
+from pathlib import Path
 import json
 import asyncio
 import nest_asyncio
@@ -10,6 +11,9 @@ import nest_asyncio
 nest_asyncio.apply()
 
 load_dotenv()
+
+ROOT_DIR = Path(__file__).resolve().parents[2]
+CONFIG_PATH = ROOT_DIR / "config" / "server_config.json"
 
 class MCP_ChatBot:
     def __init__(self):
@@ -118,7 +122,7 @@ class MCP_ChatBot:
 
     async def connect_to_servers(self):
         try:
-            with open("server_config.json", "r") as file:
+            with open(CONFIG_PATH, "r", encoding="utf-8") as file:
                 data = json.load(file)
             servers = data.get("mcpServers", {})
             for server_name, server_config in servers.items():

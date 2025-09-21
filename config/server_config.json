@@ -11,11 +11,11 @@
         },
         "complimentor": {
             "command": "uv",
-            "args": ["run", "complimentor_server.py"]
+            "args": ["run", "src/servers/mongo_server.py"]
         },
         "research": {
             "command": "uv",
-            "args": ["run", "research_server.py"]
+            "args": ["run", "src/servers/research_server.py"]
         },
         
         "fetch": {

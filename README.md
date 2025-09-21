@@ -40,82 +40,46 @@ The chatbot offers a comprehensive set of functionalities for interacting with M
 * **Prompt Execution:** Allows listing and executing predefined prompts with arguments.
 * **Resource Access:** Provides functionality to access resources identified by URIs (e.g., `papers://`).
 
+## Repository Layout
+
+```
+config/                 # MCP server launch configuration
+data/papers/            # Cached arXiv metadata (created at runtime)
+src/chatbot/app.py      # CLI chatbot entry point
+src/servers/mongo_server.py    # MongoDB FastMCP tool server
+src/servers/research_server.py # Research FastMCP tool server
+```
+
 ## Getting Started
 
 ### Prerequisites
 
-* Python 3.x
-* A running MongoDB instance (default connection expects `mongodb://localhost:27017/`).
-* Required Python libraries (listed in the code's `import` statements):
-    * `pymongo`
-    * `bson`
-    * `mcp`
-    * `anthropic`
-    * `ollama`
-    * `requests`
-    * `python-dotenv`
+* Python 3.11+
+* A running MongoDB instance (defaults to `mongodb://localhost:27017/`).
+* An Anthropic API key exported in your environment or stored in `.env`.
+* Project dependencies installed via `uv pip install --system .` or `pip install -r requirements.txt`.
 
-### Installation
+### Configure Environment
 
-1.  **Save the Code:**
-    Save the MongoDB tool code (the first large block you provided) into a file, for example, `mongo_tools_server.py`.
-    Save the chatbot code (the second large block you provided) into a file, for example, `chatbot_main.py`.
+Create a `.env` file in the project root to load Anthropic credentials:
 
-2.  **Install Dependencies:**
-    You will need to install the libraries mentioned in the prerequisites. If you have a `requirements.txt` file (which is not provided, but would typically be generated), you'd run `pip install -r requirements.txt`. Otherwise, install them individually:
+```env
+ANTHROPIC_API_KEY="your_key_here"
+ANTHROPIC_MODEL="claude-3-haiku-20240307"
+```
 
-    ```bash
-    pip install pymongo python-dotenv anthropic requests ollama mcp
-    ```
+`python-dotenv` will load these values automatically when the chatbot starts.
 
-3.  **Create `.env` File:**
-    Create a file named `.env` in the same directory as your `chatbot_main.py` script. This file will store your LLM configuration. Choose one `LLM_MODE` and provide the corresponding details.
+### Run the Services
 
-    ```env
-    # Example for Anthropic
-    LLM_MODE="anthropic"
-    ANTHROPIC_API_KEY="your_anthropic_api_key"
-    ANTHROPIC_MODEL="claude-3-haiku-20240307"
+1. Start the MongoDB and research MCP servers (the chatbot will launch them on demand using `config/server_config.json`).
+2. Launch the chatbot CLI:
 
-    # Or for Ollama
-    # LLM_MODE="ollama"
-    # OLLAMA_MODEL="mistral"
+```bash
+uv run src/chatbot/app.py
+```
 
-    # Or for Hugging Face
-    # LLM_MODE="huggingface"
-    # HF_API_KEY="your_huggingface_api_key"
-    # HF_MODEL="mistralai/Mixtral-8x7B-Instruct-v0.1"
-    ```
-
-
-### Running the Chatbot
-
-1.  **Start the Chatbot:**
-
-    ```bash
-    python chatbot_main.py
-    ```
-
-2.  **Provide User ID:**
-    The chatbot will prompt you to enter a User ID. This ID will be used to create and manage your specific MongoDB database.
-
-    ```
-    Please enter your User ID to start (e.g., 68511be6b86b76f4a3e5d35b):
-    ```
-
-3.  **Interact:**
-    Once the User ID is set, you can begin interacting with the chatbot.
-
-    ```
-    MCP Chatbot Started!
-    Type your queries or 'quit' to exit.
-    Use @folders to see available topics
-    Use @<topic> to search papers in that topic
-    Use /prompts to list available prompts
-    Use /prompt <name> <arg1=value1> to execute a prompt
-
-    Query:
-    ```
+3. Provide a `user_id` when prompted, then interact using natural language commands. Use `quit` to exit.
 
 ## Usage Examples
 
@@ -152,13 +116,10 @@ The chatbot offers a comprehensive set of functionalities for interacting with M
 
 ## System Architecture
 
-The project consists of two main components:
+The project consists of three main components:
 
-1.  **MongoDB Tools Server:** A `FastMCP` server that exposes a set of Python functions as tools, enabling direct interaction with MongoDB. This server runs in a separate process and communicates via standard I/O (stdio).
-2.  **Chatbot Client:** A Python application that acts as the conversational interface. It connects to the MCP server, retrieves the available tools, and uses an LLM to:
-    * Understand user input.
-    * Select the appropriate MongoDB tool(s) to call.
-    * Formulate arguments for the tools, including automatically injecting the `user_id`.
-    * Process the tool results and generate a human-readable response back to the user.
+1.  **MongoDB Tools Server (`src/servers/mongo_server.py`):** exposes MongoDB CRUD utilities as MCP tools, scoped per user database. The chatbot launches it via stdio when needed.
+2.  **Research Tools Server (`src/servers/research_server.py`):** wraps arXiv search/extraction features and publishes MCP resources/prompts backed by cached metadata.
+3.  **Chatbot Client (`src/chatbot/app.py`):** connects to every MCP server listed in `config/server_config.json`, orchestrates tool calls based on Anthropic model responses, and handles the interactive CLI loop.
 
-Communication between the chatbot client and the MongoDB tools server is managed by the `mcp` library. LLM interaction is handled via the `send_message` function, abstracting the specific LLM provider.
+Communication between components is brokered by the `mcp` library over stdio. Anthropic's Messages API powers the natural-language reasoning layer.
