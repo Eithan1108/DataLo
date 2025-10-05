@@ -77,6 +77,20 @@ class MCP_ChatBot:
         """
                 }
 
+        # Extend the system prompt with collection inference and retrieval defaults
+        self.system_prompt['content'] += """
+
+        \n\nAdditional Guidance - Collection Inference and Retrieval Defaults:\n\n
+        When the user requests data from an unspecified collection (e.g., "my friends"), do not ask for the collection name immediately. Instead:
+        1) Call get_user_collections(user_id).
+        2) Infer the best candidate collection(s) using name similarity with this priority list: ["friends", "friend", "contacts", "people", "friendsmain", "main"]. Prefer exact matches; otherwise choose the highest-similarity candidate.
+        3) For the first viable candidate, call get_all_documents(user_id, collection_name). If empty, try the next candidate.
+        4) If documents are found, extract and return the "name" field; if absent, choose a name-like field (e.g., "full_name", or concatenate "first_name" + "last_name"). Never fabricate values.
+        5) If no collections match or all are empty, inform the user briefly and propose next steps: either provide the correct collection name or add entries via insert_to_collection.
+
+        Act without asking clarifying questions unless the choice is ambiguous after attempts. Never invent data or assume documents exist.
+        """
+
     async def connect_to_server(self, server_name, server_config):
         try:
             server_params = StdioServerParameters(**server_config)
@@ -138,6 +152,7 @@ class MCP_ChatBot:
         self.chat_history.append({'role': 'user', 'content': query})
         
         
+        aggregated_text_output = []
         while True:
             messages_for_anthropic = []
             for msg in self.chat_history:
@@ -156,8 +171,9 @@ class MCP_ChatBot:
 
             for content in response.content:
                 if content.type == 'text':
-                    print(content.text) # This is the only place we want to print text content directly from the model.
+                    print(content.text)
                     assistant_content.append(content)
+                    aggregated_text_output.append(content.text)
                 elif content.type == 'tool_use':
                     has_tool_use = True
                     assistant_content.append(content)
@@ -213,6 +229,12 @@ class MCP_ChatBot:
                 if all(c.type == 'text' for c in assistant_content):
                     self.chat_history.append({'role': 'assistant', 'content': assistant_content})
                 break
+
+        return "\n".join(aggregated_text_output).strip()
+
+    async def ask(self, query: str) -> str:
+        """Convenience wrapper to process a query and return assistant text."""
+        return await self.process_query(query)
 
     async def get_resource(self, resource_uri):
         session = self.sessions.get(resource_uri)

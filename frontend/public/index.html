@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MCP Chat</title>
+    <style>
+      :root { color-scheme: light dark; }
+      body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; }
+      .container { max-width: 800px; margin: 0 auto; padding: 16px; }
+      .card { border: 1px solid #ddd; border-radius: 12px; padding: 12px; background: #fff0; backdrop-filter: blur(6px); }
+      .row { display: flex; gap: 8px; }
+      .col { flex: 1; }
+      .messages { height: 60vh; overflow-y: auto; padding: 8px; border: 1px solid #ddd; border-radius: 8px; background: #fafafa0d; }
+      .msg { margin: 8px 0; padding: 8px 10px; border-radius: 8px; }
+      .user { background: #2563eb22; align-self: flex-end; }
+      .assistant { background: #16a34a22; }
+      .muted { opacity: 0.7; font-size: 12px; }
+      input, button { padding: 10px; border-radius: 8px; border: 1px solid #ccc; }
+      button { background: #2563eb; color: white; border: none; cursor: pointer; }
+      button:disabled { opacity: 0.6; cursor: not-allowed; }
+      textarea { width: 100%; min-height: 64px; padding: 10px; border-radius: 8px; border: 1px solid #ccc; resize: vertical; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>MCP Chat</h2>
+      <div class="card">
+        <div class="row" style="margin-bottom: 8px; align-items: center;">
+          <div class="col"><input id="userId" placeholder="User ID" /></div>
+          <button id="initBtn">Initialize</button>
+          <span id="status" class="muted">Not initialized</span>
+        </div>
+        <div id="messages" class="messages"></div>
+        <div style="margin-top: 8px;">
+          <textarea id="input" placeholder="Type a message... Use /prompts, /prompt, @folders, @topic, etc."></textarea>
+          <div class="row" style="margin-top: 8px;">
+            <div class="col"></div>
+            <button id="sendBtn" disabled>Send</button>
+          </div>
+        </div>
+      </div>
+      <p class="muted">Backend: http://localhost:8000</p>
+    </div>
+
+    <script>
+      const apiBase = 'http://localhost:8000';
+      const messagesEl = document.getElementById('messages');
+      const inputEl = document.getElementById('input');
+      const userIdEl = document.getElementById('userId');
+      const initBtn = document.getElementById('initBtn');
+      const sendBtn = document.getElementById('sendBtn');
+      const statusEl = document.getElementById('status');
+
+      let sessionId = null;
+
+      function addMsg(role, text) {
+        const div = document.createElement('div');
+        div.className = `msg ${role}`;
+        div.textContent = text;
+        messagesEl.appendChild(div);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+      }
+
+      initBtn.onclick = async () => {
+        const userId = userIdEl.value.trim();
+        if (!userId) { alert('Enter a user ID'); return; }
+        initBtn.disabled = true; statusEl.textContent = 'Initializing...';
+        try {
+          const resp = await fetch(`${apiBase}/api/init`, {
+            method: 'POST', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ user_id: userId })
+          });
+          const data = await resp.json();
+          if (!resp.ok) throw new Error(data.detail || 'Init failed');
+          sessionId = data.session_id;
+          statusEl.textContent = `Ready (session ${sessionId})`;
+          sendBtn.disabled = false;
+        } catch (e) {
+          console.error(e); statusEl.textContent = 'Init failed';
+          alert(e.message);
+        } finally { initBtn.disabled = false; }
+      };
+
+      sendBtn.onclick = async () => {
+        const text = inputEl.value.trim();
+        if (!text || !sessionId) return;
+        addMsg('user', text);
+        inputEl.value = '';
+        sendBtn.disabled = true;
+        try {
+          const resp = await fetch(`${apiBase}/api/message`, {
+            method: 'POST', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ session_id: sessionId, message: text })
+          });
+          const data = await resp.json();
+          if (!resp.ok) throw new Error(data.detail || 'Request failed');
+          addMsg('assistant', data.reply || '(no text)');
+        } catch (e) {
+          console.error(e);
+          addMsg('assistant', `Error: ${e.message}`);
+        } finally {
+          sendBtn.disabled = false;
+        }
+      };
+    </script>
+  </body>
+</html>
+
+
